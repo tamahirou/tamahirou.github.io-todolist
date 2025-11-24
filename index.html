@@ -192,6 +192,12 @@
             animation: bounce 0.5s;
         }
 
+        .character {
+            font-size: 6em;
+            margin-bottom: 20px;
+            animation: jump 0.6s ease-in-out;
+        }
+
         .praise-content h2 {
             color: #4a90e2;
             font-size: 2em;
@@ -203,9 +209,72 @@
             color: #333;
         }
 
+        .mascot {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .mascot-character {
+            font-size: 4em;
+            cursor: pointer;
+            transition: transform 0.3s;
+            display: block;
+        }
+
+        .mascot-character:hover {
+            transform: scale(1.1);
+        }
+
+        .speech-bubble {
+            background: white;
+            border: 2px solid #4a90e2;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+            max-width: 200px;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .speech-bubble.show {
+            display: block;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 30px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+
+        .speech-bubble p {
+            margin: 0;
+            color: #333;
+            font-size: 0.9em;
+        }
+
         @keyframes bounce {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
+        }
+
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -242,9 +311,17 @@
 
     <div class="praise-modal" id="praiseModal">
         <div class="praise-content">
+            <div class="character">🐱</div>
             <h2>🎉 素晴らしい！</h2>
             <p id="praiseText"></p>
         </div>
+    </div>
+
+    <div class="mascot">
+        <div class="speech-bubble" id="speechBubble">
+            <p id="mascotMessage"></p>
+        </div>
+        <span class="mascot-character" onclick="showEncouragement()">🐱</span>
     </div>
 
     <script>
@@ -256,6 +333,19 @@
             '最高です！この勢いで頑張りましょう！',
             'お疲れ様でした！自分を褒めてあげてください！',
             'やりましたね！一歩ずつ前進しています！'
+        ];
+
+        const encouragementMessages = [
+            '今日も頑張ろうね！',
+            '休憩も大事だよ！',
+            'あなたならできる！応援してるよ！',
+            '少しずつでも前に進もう！',
+            '集中して取り組めば大丈夫！',
+            '無理しないでね。マイペースが一番！',
+            '今日のタスク、一緒に片付けよう！',
+            'いつも頑張ってるね。すごいよ！',
+            '疲れたら休憩してね！',
+            '今日も一日お疲れ様！'
         ];
 
         let todos = [];
@@ -423,6 +513,25 @@
                 modal.style.display = 'none';
             }, 2000);
         }
+
+        function showEncouragement() {
+            const bubble = document.getElementById('speechBubble');
+            const message = document.getElementById('mascotMessage');
+            const text = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+            
+            message.textContent = text;
+            bubble.classList.add('show');
+            
+            setTimeout(() => {
+                bubble.classList.remove('show');
+            }, 3000);
+        }
+
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                showEncouragement();
+            }
+        }, 60000);
 
         document.getElementById('todoInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTodo();
