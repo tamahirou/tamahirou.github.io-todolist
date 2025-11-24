@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勉強Todo & 時間記録</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #2c5282;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f0f8ff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #b8d4f1;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #5a7ba6;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c5282;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .todo-item:hover {
+            background: #e9ecef;
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-display {
+            font-weight: bold;
+            color: #4a90e2;
+            min-width: 60px;
+        }
+
+        .timer-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+
+        .timer-btn.active {
+            background: #48bb78;
+        }
+
+        .delete-btn {
+            padding: 8px 15px;
+            background: #f56565;
+            font-size: 14px;
+        }
+
+        .praise-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .praise-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: bounce 0.5s;
+        }
+
+        .praise-content h2 {
+            color: #4a90e2;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .praise-content p {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 勉強Todo & 時間記録</h1>
+            <p>タスクを完了して、勉強時間を記録しよう！</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>今日の勉強時間</h3>
+                <p id="todayTime">0分</p>
+            </div>
+            <div class="stat-card">
+                <h3>完了したタスク</h3>
+                <p id="completedCount">0個</p>
+            </div>
+            <div class="stat-card">
+                <h3>合計勉強時間</h3>
+                <p id="totalTime">0分</p>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <div class="input-group">
+                <input type="text" id="todoInput" placeholder="新しいタスクを入力...">
+                <button onclick="addTodo()">追加</button>
+            </div>
+            <ul class="todo-list" id="todoList"></ul>
+        </div>
+    </div>
+
+    <div class="praise-modal" id="praiseModal">
+        <div class="praise-content">
+            <h2>🎉 素晴らしい！</h2>
+            <p id="praiseText"></p>
+        </div>
+    </div>
+
+    <script>
+        const praiseMessages = [
+            'よく頑張りました！その調子です！',
+            '素晴らしい進歩ですね！',
+            '完璧です！継続は力なり！',
+            'すごい！着実に進んでいますね！',
+            '最高です！この勢いで頑張りましょう！',
+            'お疲れ様でした！自分を褒めてあげてください！',
+            'やりましたね！一歩ずつ前進しています！'
+        ];
+
+        let todos = [];
+        let timers = {};
+
+        async function loadData() {
+            try {
+                const result = await window.storage.get('study-todos');
+                if (result) {
+                    todos = JSON.parse(result.value);
+                }
+            } catch (e) {
+                todos = [];
+            }
+            renderTodos();
+            updateStats();
+        }
+
+        async function saveData() {
+            try {
+                await window.storage.set('study-todos', JSON.stringify(todos));
+            } catch (e) {
+                console.error('保存エラー:', e);
+            }
+        }
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+            
+            if (text === '') return;
+            
+            todos.push({
+                id: Date.now(),
+                text: text,
+                completed: false,
+                studyTime: 0,
+                createdAt: new Date().toISOString()
+            });
+            
+            input.value = '';
+            saveData();
+            renderTodos();
+            updateStats();
+        }
+
+        function toggleComplete(id) {
+            const todo = todos.find(t => t.id === id);
+            if (!todo) return;
+            
+            if (timers[id]) {
+                toggleTimer(id);
+            }
+            
+            todo.completed = !todo.completed;
+            
+            if (todo.completed) {
+                showPraise();
+            }
+            
+            saveData();
+            renderTodos();
+            updateStats();
+        }
+
+        function toggleTimer(id) {
+            if (timers[id]) {
+                clearInterval(timers[id].interval);
+                delete timers[id];
+                saveData();
+            } else {
+                timers[id] = {
+                    interval: setInterval(() => {
+                        const todo = todos.find(t => t.id === id);
+                        if (todo) {
+                            todo.studyTime++;
+                            saveData();
+                            updateTimerDisplay(id);
+                            updateStats();
+                        }
+                    }, 60000),
+                    startTime: Date.now()
+                };
+            }
+            renderTodos();
+        }
+
+        function updateTimerDisplay(id) {
+            const todo = todos.find(t => t.id === id);
+            const display = document.getElementById(`time-${id}`);
+            if (display && todo) {
+                display.textContent = `${todo.studyTime}分`;
+            }
+        }
+
+        function deleteTodo(id) {
+            if (timers[id]) {
+                clearInterval(timers[id].interval);
+                delete timers[id];
+            }
+            todos = todos.filter(t => t.id !== id);
+            saveData();
+            renderTodos();
+            updateStats();
+        }
+
+        function formatTime(minutes) {
+            if (minutes < 60) return `${minutes}分`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}時間${mins}分`;
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = '';
+            
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                
+                const isTimerActive = !!timers[todo.id];
+                
+                li.innerHTML = `
+                    <input type="checkbox" class="checkbox" 
+                           ${todo.completed ? 'checked' : ''} 
+                           onchange="toggleComplete(${todo.id})">
+                    <span class="todo-text">${todo.text}</span>
+                    <div class="timer">
+                        <span class="time-display" id="time-${todo.id}">${todo.studyTime}分</span>
+                        <button class="timer-btn ${isTimerActive ? 'active' : ''}" 
+                                onclick="toggleTimer(${todo.id})"
+                                ${todo.completed ? 'disabled' : ''}>
+                            ${isTimerActive ? '⏸ 停止' : '▶ 開始'}
+                        </button>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTodo(${todo.id})">削除</button>
+                `;
+                
+                list.appendChild(li);
+            });
+        }
+
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayTodos = todos.filter(t => new Date(t.createdAt).toDateString() === today);
+            const todayTime = todayTodos.reduce((sum, t) => sum + t.studyTime, 0);
+            const totalTime = todos.reduce((sum, t) => sum + t.studyTime, 0);
+            const completedCount = todos.filter(t => t.completed).length;
+            
+            document.getElementById('todayTime').textContent = formatTime(todayTime);
+            document.getElementById('totalTime').textContent = formatTime(totalTime);
+            document.getElementById('completedCount').textContent = `${completedCount}個`;
+        }
+
+        function showPraise() {
+            const modal = document.getElementById('praiseModal');
+            const text = document.getElementById('praiseText');
+            const message = praiseMessages[Math.floor(Math.random() * praiseMessages.length)];
+            
+            text.textContent = message;
+            modal.style.display = 'flex';
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 2000);
+        }
+
+        document.getElementById('todoInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTodo();
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
